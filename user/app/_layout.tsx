@@ -1,20 +1,38 @@
+import '@/global.css';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
-import '@/global.css';
+import { useFonts } from 'expo-font';
+import { ActivityIndicator, View } from 'react-native';
 
 export default function RootLayout() {
 
+  const [fontLoaded] = useFonts({
+    "Sora-Regular": require("../assets/fonts/Sora-Regular.ttf"),
+    "Sora-Bold": require("../assets/fonts/Sora-Bold.ttf"),
+    "Sora-Light": require("../assets/fonts/Sora-Light.ttf"),
+  });
+
+  if ( !fontLoaded ) {
+    return (
+      <View className='flex-1  items-center justify-center bg-background'>
+        <ActivityIndicator />
+      </View>
+    )
+  }
+
   return (
-    
     <GluestackUIProvider mode="dark">
-      <>
-      <Stack>
+      <Stack screenOptions={{
+          animation: "slide_from_right",
+          gestureEnabled: true,
+          animationDuration: 400,
+          headerShown: false,
+        }}
+      >
         <Stack.Screen name="index" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="auto" />
-    </>
     </GluestackUIProvider>
   
   );
