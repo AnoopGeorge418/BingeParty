@@ -21,7 +21,14 @@ export default function App() {
             <ButtonText className="text-black font-sora-bold">Sign In</ButtonText>
           </Button>
         </View>
-        <Text className="text-white mt-[10px] text-center text-[12px] font-sora">By continuing, you agree to our <Text className='text-primary font-sora'>Terms</Text> & <Text className='text-primary font-sora'>Privacy Policy</Text>.</Text>
+        <Pressable onPress={() => router.push("/termsandPrivacy")}>
+          <View className='flex justify-center items-center text-center'>
+            <Text className="text-white mt-[10px] text-center text-[12px] font-sora ">
+              By continuing, you agree to our
+              <Text className='text-primary font-sora'> Terms & Privacy Policy.</Text>
+            </Text>
+          </View>
+        </Pressable>
       </View>
     </View>
   );
