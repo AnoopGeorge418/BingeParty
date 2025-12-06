@@ -4,73 +4,89 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 import { Button, ButtonText } from '@/components/ui/button';
 import { useState } from 'react';
-import { useToast, Toast } from '@/components/ui/toast';
-import { Alert } from 'react-native';
+import Toast from 'react-native-toast-message';
 
 const Signup = () => {
 
-    const [ firstName, setFirstName ] = useState("");
-    const [ lastName, setLastName ] = useState("");
-    const [ email, setEmail ] = useState("")
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName]   = useState("");
+  const [email, setEmail]         = useState("");
 
-    const fetchUserData = async () => {
-        try {
-            if (!firstName.trim()) {
-                Alert.alert('Error', 'First name is required!');
-                return;
-            } 
-            
-            if (!lastName.trim()) {
-                Alert.alert('Error', 'Last name is required!');
-                return;
-            }
-            
-            if (!email.trim() || !email.includes('@')) {
-                Alert.alert('Error', 'Enter a valida email address!');
-                return;
-            } 
-            
-            // Sending data to backend
-            const userData = {
-                firstName, 
-                lastName, 
-                email,
-            }
+  // ======================================================
+  // UNIVERSAL BACKEND CALL HANDLER
+  // ======================================================
+  const apiCall = async (endpoint: string, payload: any) => {
+    try {
+      const res = await fetch(`YOUR_BACKEND_URL/${endpoint}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-            const request = await fetch("https://jsonplaceholder.typicode.com/posts", {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(userData),
-            });
+      const data = await res.json();
+      return { ok: res.ok, data };
+    } catch (error: any) {
+      return {
+        ok: false,
+        data: { message: error.message || "Network error" },
+      };
+    }
+  };
 
-            // Backend response
-            const response = await request.json();
-            if (!response.ok) {
-                Alert.alert("Error", "Server error, try again later!");
-                return;
-            }
+  const fetchUserData = async () => {
 
-            // Success
-            Alert.alert("Success", "User verified! Redirecting...");
-            console.log("Backend Response:", response);
+    // ======================================================
+    // VALIDATION
+    // ======================================================
 
-            // Navigating to onboarding
-            router.push("/onboarding/step1");
+    if (!firstName.trim()) {
+      Toast.show({ type: "error", text1: "First name is required!" });
+      return;
+    }
 
-        } catch (err: any) {
-            Alert.alert("Error", err.message || "Something went wrong.");
-        }
-    };
+    if (!lastName.trim()) {
+      Toast.show({ type: "error", text1: "Last name is required!" });
+      return;
+    }
 
-    const verifyGoogleUser = () => {
+    if (!email.trim() || !email.includes("@")) {
+      Toast.show({ type: "error", text1: "Enter a valid email address!" });
+      return;
+    }
 
-    };
+    // ======================================================
+    // SEND TO BACKEND
+    // ======================================================
+    const payload = { firstName, lastName, email };
 
-    const verifyGithubUser = () => {
+    const { ok, data } = await apiCall("auth/signup", payload);
 
-    };
+    // Backend error handling
+    if (!ok) {
+      Toast.show({
+        type: "error",
+        text1: data.message || "Signup failed! Try again.",
+      });
+      return;
+    }
+
+    // SUCCESS
+    Toast.show({
+      type: "success",
+      text1: "Account created!",
+      text2: "Redirecting…",
+    });
+
+    router.push("/onboarding/step1");
+  };
+
+  const verifyGoogleUser = () => {
+    Toast.show({ type: "info", text1: "Google signup not implemented yet" });
+  };
+
+  const verifyGithubUser = () => {
+    Toast.show({ type: "info", text1: "Github signup not implemented yet" });
+  };
 
   return (
     <View className="bg-background flex-1">
@@ -106,7 +122,7 @@ const Signup = () => {
               value={firstName}
               onChangeText={setFirstName}
               placeholderTextColor="#B9B9B9"
-              className="w-full h-[49px] rounded-[10px] pl-3 text-white border-2 border-primary font-sora-light text-[14px] mt-2"
+              className="w-full h-[49px] rounded-[10px] pl-3 text-white border-2 border-primary mt-2"
             />
           </View>
 
@@ -114,11 +130,11 @@ const Signup = () => {
           <View className="mb-4">
             <Text className="font-sora-bold text-white text-[14px]">Last Name</Text>
             <TextInput
+              placeholder="Enter your last name"
               value={lastName}
               onChangeText={setLastName}
-              placeholder="Enter your last name"
               placeholderTextColor="#B9B9B9"
-              className="w-full h-[49px] rounded-[10px] pl-3 text-white border-2 border-primary font-sora-light text-[14px] mt-2"
+              className="w-full h-[49px] rounded-[10px] pl-3 text-white border-2 border-primary mt-2"
             />
           </View>
 
@@ -131,14 +147,13 @@ const Signup = () => {
               placeholder="Enter your email"
               placeholderTextColor="#B9B9B9"
               autoCapitalize="none"
-              autoComplete="email"
-              textContentType="emailAddress"
               keyboardType="email-address"
-              className="w-full h-[49px] rounded-[10px] pl-3 text-white border-2 border-primary font-sora-light text-[14px] mt-2"
+              textContentType="emailAddress"
+              className="w-full h-[49px] rounded-[10px] pl-3 text-white border-2 border-primary mt-2"
             />
           </View>
 
-          {/* Button */}
+          {/* Verify Button */}
           <Button
             className="bg-primary w-full h-[49px] rounded-[10px]"
             onPress={fetchUserData}
@@ -146,37 +161,39 @@ const Signup = () => {
             <ButtonText className="text-white font-sora-bold text-[18px]">Verify Account</ButtonText>
           </Button>
 
-          {/* divider */}
-          <View className='w-full flex-row items-center my-6'>
-            <View className='flex-1 h-[1px] bg-white'/>
-            <Text className='text-graylight mx-3 font-sora-bold'>Or</Text>
-            <View className="flex-1 h-[1px] bg-white" />
+          {/* Divider */}
+          <View className="w-full flex-row items-center my-6">
+            <View className="flex-1 h-[1px] bg-white"/>
+            <Text className="text-graylight mx-3 font-sora-bold">Or</Text>
+            <View className="flex-1 h-[1px] bg-white"/>
           </View>
-          
-          {/* Social login */}
+
+          {/* Social Login */}
           <View>
             <Button
-                className="bg-white w-full h-[49px] rounded-[10px]"
-                onPress={verifyGoogleUser}
+              className="bg-white w-full h-[49px] rounded-[10px]"
+              onPress={verifyGoogleUser}
             >
-                <Ionicons name="logo-google" size={30}/>
-                <ButtonText className="text-black font-sora-bold text-[16px]">Continue with Google</ButtonText>
+              <Ionicons name="logo-google" size={30}/>
+              <ButtonText className="text-black font-sora-bold text-[16px]">Continue with Google</ButtonText>
             </Button>
+
             <Button
-                className="bg-white w-full h-[49px] rounded-[10px] mt-4"
-                onPress={verifyGithubUser}
-            >   
-                <Ionicons name="logo-github" size={30} />
-                <ButtonText className="text-black font-sora-bold text-[16px]">Continue with Github</ButtonText>
+              className="bg-white w-full h-[49px] rounded-[10px] mt-4"
+              onPress={verifyGithubUser}
+            >
+              <Ionicons name="logo-github" size={30} />
+              <ButtonText className="text-black font-sora-bold text-[16px]">Continue with Github</ButtonText>
             </Button>
           </View>
 
-          {/* SignIn redirection */}
-          <View className='mt-4 flex justify-center items-center'>
-            <Pressable
-                onPress={() => router.push("/auth/signin")}
-            >
-                <Text className='text-white font-sora text-[14px]'>Already have an account? <Text className='text-primary font-sora-bold'>Sign in</Text></Text>
+          {/* Redirect to SignIn */}
+          <View className="mt-4 flex justify-center items-center">
+            <Pressable onPress={() => router.push("/auth/signin")}>
+              <Text className="text-white font-sora text-[14px]">
+                Already have an account?{" "}
+                <Text className="text-primary font-sora-bold">Sign in</Text>
+              </Text>
             </Pressable>
           </View>
 
