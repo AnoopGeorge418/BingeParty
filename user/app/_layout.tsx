@@ -6,7 +6,7 @@ import { useFonts } from 'expo-font';
 import { ActivityIndicator, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { Toasts } from '@backpackapp-io/react-native-toast';
+import Toast from 'react-native-toast-message';
 
 export default function RootLayout() {
 
@@ -15,7 +15,7 @@ export default function RootLayout() {
     "Sora-Bold": require("../assets/fonts/Sora-Bold.ttf"),
     "Sora-Light": require("../assets/fonts/Sora-Light.ttf"),
   });
-2
+
   if ( !fontLoaded ) {
     return (
       <View className='flex-1  items-center justify-center bg-background'>
@@ -37,8 +37,8 @@ export default function RootLayout() {
           >
             <Stack.Screen name="index" options={{ headerShown: false }} />
           </Stack>
+          <Toast position="top" topOffset={50} />
           <StatusBar style="auto" />
-
         </GluestackUIProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
